@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+from .celery_redis import *
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -28,6 +29,12 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 
+CORS_ALLOW_HEADERS = [ 
+    'X-Store-Id',
+    'Content-Type',
+    'Authorization',
+    'Access-Control-Allow-Headers',
+]
 # Application definition
 
 INSTALLED_APPS = [
@@ -36,18 +43,26 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
+    'django.contrib.staticfiles',    
+    'corsheaders',    
+    'rest_framework',
+    'rest_framework_simplejwt.token_blacklist',
+    'inventory',
+    'django_celery_results'    
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+     
 ]
+
 
 ROOT_URLCONF = 'inventory_service.urls'
 
@@ -68,6 +83,27 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'inventory_service.wsgi.application'
+
+SWAGGER_SETTINGS = {
+    'DEFAULT_INFO': 'enid.urls.swagger_info', 
+    'SECURITY_DEFINITIONS': {
+        'Basic': {
+            'type': 'basic'
+        }
+    }
+}
+
+
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+        
+    ],
+}
 
 
 # Database
@@ -121,3 +157,8 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+KAFKA_BOOTSTRAP_SERVERS = 'localhost:9092'
+KAFKA_ORDER_TOPIC = 'new_order'
+
+CELERY_APP = 'inventory.tasks'
+
